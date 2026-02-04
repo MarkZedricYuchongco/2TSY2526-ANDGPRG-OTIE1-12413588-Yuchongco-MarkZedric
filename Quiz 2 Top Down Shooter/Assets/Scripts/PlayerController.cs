@@ -1,10 +1,20 @@
+using TMPro;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] private float movementSpeed;
-    //[SerializeField] private float health = 10f;
+    [SerializeField] private float health = 10f;
+    [SerializeField] private float maxHealth = 10f;
+    [SerializeField] private TextMeshProUGUI healthText;
+    [SerializeField] private TextMeshProUGUI modeText;
+
+    private float regenTimer = 0f;
+    [SerializeField] private float regenCooldown = 5f;
+
     private int shootMode = 1;
+    private string currentMode = "";
+    public static bool IsPlayerAlive = true;
 
     void Start()
     {
@@ -13,11 +23,33 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (IsPlayerAlive == false)
+        {
+            return;
+        }
+
         HandleShootModeInput();
         HandleMovementInput();
         HandleRotationInput();
         HandleShootInput();
-        //HandleHealth();
+        HandleRegen();
+        HandleShootModeText();
+        UpdateUI();
+    }
+
+    void HandleRegen()
+    {
+        if (health < maxHealth)
+        {
+            regenTimer += Time.deltaTime;
+            if (regenTimer >= regenCooldown)
+            {
+                health += 1f;
+                regenTimer = 0f;
+                Debug.Log("Player regenerated health! Current health: " + health);
+                SFXManager.instance.PlaySound("Heal");
+            }
+        }
     }
 
     void HandleMovementInput()
@@ -45,22 +77,45 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKey(KeyCode.Alpha1) && shootMode != 1)
         {
             shootMode = 1;
+            SFXManager.instance.PlaySound("SwitchMode");
             Debug.Log("Switched Shoot Mode to First!");
         }
         else if (Input.GetKey(KeyCode.Alpha2) && shootMode != 2)
         {
             shootMode = 2;
+            SFXManager.instance.PlaySound("SwitchMode");
             Debug.Log("Switched Shoot Mode to Second!");
         }
         else if (Input.GetKey(KeyCode.Alpha3) && shootMode != 3)
         {
             shootMode = 3;
+            SFXManager.instance.PlaySound("SwitchMode");
             Debug.Log("Switched Shoot Mode to Third!");
         }
         else if (Input.GetKey(KeyCode.Alpha4) && shootMode != 4)
         {
             shootMode = 4;
+            SFXManager.instance.PlaySound("SwitchMode");
             Debug.Log("Switched Shoot Mode to Fourth!");
+        }
+    }
+
+    void HandleShootModeText()
+    {
+        switch (shootMode)
+        {
+            case 1:
+                currentMode = "Yellow Dwarf Stars";
+                break;
+            case 2:
+                currentMode = "White Dwarf Stars";
+                break;
+            case 3:
+                currentMode = "Giant Blue Binary Stars";
+                break;
+            case 4:
+                currentMode = "Red Dwarf Stars";
+                break;
         }
     }
 
@@ -89,33 +144,51 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    //for future health management
-    //when player dies, causes several errors because there is no game end management
-    //public void TakeDamage(float damage)
-    //{
-    //    health -= damage;
-    //    Debug.Log("Player took damage! Current health: " + health);
-    //}
+    //for health management
+    public void TakeDamage(float damage)
+    {
+        SFXManager.instance.PlaySound("PlayerDamage");
+        health -= damage;
+        regenTimer = 0f;
+        Debug.Log("Player took damage! Current health: " + health);
 
-    //void HandleHealth()
-    //{
-    //    if (health <= 0)
-    //    {
-    //        Destroy(this.gameObject);
-    //    }
-    //}
+        if (health <= 0)
+        {
+            KillPlayer();
+        }
+    }
 
-    //void OnTriggerEnter(Collider other)
-    //{
-    //    if (other.CompareTag("Enemy"))
-    //    {
-    //        EnemyController enemy = other.gameObject.GetComponent<EnemyController>();
-    //        if (enemy != null)
-    //        {
-    //            Debug.Log("Player hit by an Enemy!");
-    //            TakeDamage(1);
-    //            Destroy(other.gameObject); // Destroy the projectile upon impact
-    //        }
-    //    }
-    //}
+    void UpdateUI()
+    {
+        healthText.text = "Health: " + Mathf.RoundToInt(health).ToString();
+        modeText.text = "Shooting: " + currentMode;
+    }
+
+    void KillPlayer()
+    {
+        IsPlayerAlive = false;
+        Debug.Log("Player has died! Game Over!");
+
+        if (MusicManager.instance != null)
+        {
+            MusicManager.instance.PlayGameOverMusic();
+        }
+
+        GetComponent<MeshRenderer>().enabled = false;
+        this.enabled = false;
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Enemy"))
+        {
+            EnemyController enemy = other.gameObject.GetComponent<EnemyController>();
+            if (enemy != null)
+            {
+                Debug.Log("Player hit by an Enemy!");
+                TakeDamage(1);
+                Destroy(other.gameObject); // Destroy the projectile upon impact
+            }
+        }
+    }
 }

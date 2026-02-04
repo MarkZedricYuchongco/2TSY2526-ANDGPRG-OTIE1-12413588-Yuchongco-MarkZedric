@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 public class EnemyController : MonoBehaviour
@@ -19,7 +20,12 @@ public class EnemyController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (playerTransform != null)
+        if (PlayerController.IsPlayerAlive == false)
+        {
+            return;
+        }
+
+            if (playerTransform != null)
             HandleMovement();
         HandleHealth();
     }
@@ -52,6 +58,13 @@ public class EnemyController : MonoBehaviour
     {
         if (health <= 0)
         {
+            if (ScoreManager.instance != null)
+            {
+                ScoreManager.instance.AddScore(10);
+            }
+            
+            SFXManager.instance.PlaySound("EnemyDeath");
+
             Destroy(this.gameObject);
         }
     }
@@ -70,8 +83,9 @@ public class EnemyController : MonoBehaviour
             if (projectile != null)
             {
                 Debug.Log("Enemy hit by a bullet!");
+                SFXManager.instance.PlaySound("EnemyDamage");
                 TakeDamage(projectile.damage);
-                Destroy(other.gameObject); // Destroy the projectile upon impact
+                projectile.RegisterHit();
             }
         }
     }

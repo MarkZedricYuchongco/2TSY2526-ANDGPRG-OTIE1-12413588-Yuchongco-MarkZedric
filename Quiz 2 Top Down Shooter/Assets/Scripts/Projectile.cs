@@ -7,6 +7,9 @@ public class Projectile : MonoBehaviour
     [SerializeField] private float projectileSpeed;
     [SerializeField] private float maxProjectileLifespan;
     [SerializeField] public float damage;
+
+    [SerializeField] private int pierceCount = 0;
+
     private float timeSpawned = 0;
 
     void Start()
@@ -17,6 +20,11 @@ public class Projectile : MonoBehaviour
 
     void Update()
     {
+        if (PlayerController.IsPlayerAlive == false)
+        {
+            return;
+        }
+
         MoveProjectile();
     }
 
@@ -29,6 +37,18 @@ public class Projectile : MonoBehaviour
         else
         {
             transform.Translate(Vector3.forward * projectileSpeed * Time.deltaTime);
+        }
+    }
+
+    public void RegisterHit()
+    {
+        if (pierceCount <= 0)
+        {
+            Destroy(this.gameObject);
+        }
+        else
+        {
+            pierceCount--;
         }
     }
 }

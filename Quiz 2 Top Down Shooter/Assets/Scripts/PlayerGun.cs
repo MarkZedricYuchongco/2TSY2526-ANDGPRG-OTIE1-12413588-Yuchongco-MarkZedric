@@ -24,13 +24,14 @@ public class PlayerGun : MonoBehaviour
 
     void Update()
     {
-        
+
     }
 
     public void Shoot1()
     {
         if (lastTimeShot + type1FiringSpeed <= Time.time)
         {
+            SFXManager.instance.PlaySound("Shoot");
             lastTimeShot = Time.time;
             Instantiate(type1Projectile, firingPoint.position, firingPoint.rotation);
         }
@@ -40,6 +41,7 @@ public class PlayerGun : MonoBehaviour
     {
         if (lastTimeShot + type2FiringSpeed <= Time.time)
         {
+            SFXManager.instance.PlaySound("SmallShoot");
             lastTimeShot = Time.time;
             Instantiate(type2Projectile, firingPoint.position, firingPoint.rotation);
         }
@@ -49,6 +51,7 @@ public class PlayerGun : MonoBehaviour
     {
         if (lastTimeShot + type3FiringSpeed <= Time.time)
         {
+            SFXManager.instance.PlaySound("StrongShoot");
             lastTimeShot = Time.time;
             Instantiate(type3Projectile, firingPoint.position, firingPoint.rotation);
         }
@@ -58,6 +61,7 @@ public class PlayerGun : MonoBehaviour
     {
         if (lastTimeShot + type4FiringSpeed <= Time.time)
         {
+            SFXManager.instance.PlaySound("Shoot");
             lastTimeShot = Time.time;
             for (int i = -2; i <= 2; i++)
             {

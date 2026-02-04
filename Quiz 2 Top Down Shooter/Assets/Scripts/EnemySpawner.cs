@@ -20,6 +20,11 @@ public class EnemySpawner : MonoBehaviour
 
     void Update()
     {
+        if (PlayerController.IsPlayerAlive == false)
+        {
+            return;
+        }
+
         if (playerTransform == null)
             return;
 

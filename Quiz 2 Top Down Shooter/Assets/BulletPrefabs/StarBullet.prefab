@@ -124,3 +124,4 @@ MonoBehaviour:
   projectileSpeed: 10
   maxProjectileLifespan: 5
   damage: 1
+  pierceCount: 1
