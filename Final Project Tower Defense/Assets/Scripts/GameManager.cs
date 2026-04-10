@@ -25,7 +25,9 @@ public class GameManager : MonoBehaviour
     [Header("Wave Configuration")]
     public Wave[] waves;
     public Transform spawnPoint;
+    public float initialDelay = 25f;
     public float timeBetweenWaves = 10f;
+    private float waveCountdown;
 
     [Header("Player Stats Configuration")]
     public int health = 100;
@@ -56,23 +58,31 @@ public class GameManager : MonoBehaviour
 
     IEnumerator SpawnWaves()
     {
+        waveCountdown = initialDelay;
+        while (waveCountdown > 0)
+        {
+            waveCountdown -= Time.deltaTime;
+            yield return null;
+        }
+
         while (currentWaveIndex < waves.Length)
         {
-
             yield return StartCoroutine(SpawnWaveRoutine(waves[currentWaveIndex]));
-
             yield return new WaitUntil(() => activeMonsters.Count == 0);
-
-            Debug.Log($"Wave cleared. Next wave in {timeBetweenWaves}s.");
 
             currentWaveIndex++;
 
             if (currentWaveIndex < waves.Length)
             {
-                yield return new WaitForSeconds(timeBetweenWaves);
+                waveCountdown = timeBetweenWaves;
+
+                while (waveCountdown > 0)
+                {
+                    waveCountdown -= Time.deltaTime;
+                    yield return null;
+                }
             }
         }
-
         Debug.Log("All waves cleared.");
     }
 
@@ -138,10 +148,9 @@ public class GameManager : MonoBehaviour
 
         if (waveCountdownText != null)
         {
-            float timeToNextWave = timeBetweenWaves - (Time.time % timeBetweenWaves);
-            if (timeToNextWave > 0 && activeMonsters.Count <= 0)
+            if (waveCountdown > 0)
             {
-                waveCountdownText.text = $"Next Wave In: {timeToNextWave:F1}s";
+                waveCountdownText.text = $"Next Wave In: {waveCountdown:F1}s";
             }
             else
             {
